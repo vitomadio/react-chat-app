@@ -1,14 +1,15 @@
 import React from 'react';
-import firebase from './firebase';
+import { Switch, Route } from 'react-router-dom';
+import LoginPage from './views/login-page';
 
 export interface IAppProps {
 }
 
-const App: React.FunctionComponent<IAppProps> = (props: IAppProps) => {
+const App: React.FunctionComponent<IAppProps> = (props: IAppProps): JSX.Element => {
   return (
-    <div>
-      Hello World
-    </div>
+    <Switch>
+      <Route path="/" component={LoginPage} />
+    </Switch>
   );
 };
 
