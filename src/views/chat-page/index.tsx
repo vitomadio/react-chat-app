@@ -1,87 +1,26 @@
-import * as React from 'react';
-import clsx from 'clsx';
+import React, { useEffect, useContext, useState } from 'react';
 import { withRouter } from 'react-router-dom';
-import {
-    CssBaseline,
-    Drawer,
-    AppBar,
-    TextField,
-    Toolbar,
-    Typography,
-    Divider,
-    IconButton,
-    Badge,
-    Container,
-    Grid,
-    Paper,
-    FormControl,
-} from '@material-ui/core';
-import {
-    Menu as MenuIcon,
-    ChevronLeft as ChevronLeftIcon,
-    Notifications as NotificationsIcon,
-} from '@material-ui/icons';
+import { CssBaseline, TextField, Container, Grid, Paper, FormControl } from '@material-ui/core';
+import TopBar from './components/top-bar';
+import Drawer from './components/drawer';
 import useStyles from './styles';
 
-const ChatPage: React.SFC<any> = (props) => {
+const ChatPage: React.SFC<any> = ({ history }: any) => {
     const classes = useStyles();
-    const [open, setOpen] = React.useState(true);
+    const [open, setOpen] = useState(true);
+
     const handleDrawerOpen = () => {
         setOpen(true);
     };
     const handleDrawerClose = () => {
         setOpen(false);
     };
-    // const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
     return (
         <div className={classes.root}>
             <CssBaseline />
-            <AppBar
-                position="absolute"
-                className={clsx(classes.appBar, open && classes.appBarShift)}
-            >
-                <Toolbar className={classes.toolbar}>
-                    <IconButton
-                        edge="start"
-                        color="inherit"
-                        aria-label="open drawer"
-                        onClick={handleDrawerOpen}
-                        className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-                    <Typography
-                        component="h1"
-                        variant="h6"
-                        color="inherit"
-                        noWrap
-                        className={classes.title}
-                    >
-                        Dashboard
-                    </Typography>
-                    <IconButton color="inherit">
-                        <Badge badgeContent={4} color="secondary">
-                            <NotificationsIcon />
-                        </Badge>
-                    </IconButton>
-                </Toolbar>
-            </AppBar>
-            <Drawer
-                variant="permanent"
-                classes={{
-                    paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-                }}
-                open={open}
-            >
-                <div className={classes.toolbarIcon}>
-                    <IconButton onClick={handleDrawerClose}>
-                        <ChevronLeftIcon />
-                    </IconButton>
-                </div>
-                <Divider />
-                <Divider />
-            </Drawer>
+            <TopBar handleDrawerOpen={handleDrawerOpen} open={open} />
+            <Drawer handleDrawerClose={handleDrawerClose} open={open} />
             <main className={classes.content}>
                 <div className={classes.appBarSpacer} />
                 <Container maxWidth="lg" className={classes.container} disableGutters>

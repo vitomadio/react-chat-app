@@ -1,18 +1,28 @@
 import React, { ReactChild } from 'react';
-import { messageReducer } from './message-state';
-import { userReducer } from './user-state';
 
 const initialState: any = {
-    user: {},
+    user: null,
     message: null,
 };
 
+interface IAction {
+    type: string;
+    payload: any;
+}
+
 export const Store = React.createContext<any>(initialState);
 
-const reduceReducers = (...reducers: Array<any>) => (state: any, action: any) =>
-    reducers.reduce((acc, nextReducer) => nextReducer(acc, action), state);
+const rootReducer = (state: any, action: IAction) => {
+    switch (action.type) {
+        default:
+            return state;
+    }
+};
 
-const rootReducer = reduceReducers(userReducer, messageReducer);
+// const reduceReducers = (...reducers: Array<any>) => (state: any, action: any) =>
+//     reducers.reduce((acc, nextReducer) => nextReducer(acc, action), state);
+
+// const rootReducer = reduceReducers(userReducer, messageReducer);
 
 type Props = {
     children: ReactChild | NameChildrenSlots;

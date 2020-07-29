@@ -1,6 +1,7 @@
 export default interface IUser {
-  name?: string,
-  email?: string,
-  photoUrl?: string,
-  uid?: string
+    displayName: string | null;
+    email: string | null;
+    photoURL?: string | null;
+    emailVerified: boolean;
+    uid: string;
 }

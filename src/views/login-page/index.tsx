@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import { Formik } from 'formik';
 import { withRouter } from 'react-router-dom';
 import {
@@ -16,31 +16,45 @@ import {
 import { Alert } from '@material-ui/lab';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import useStyles from './styles';
-import { Store } from '../../store/store';
-import { UserActions } from '../../store/user-state';
-import { isEmail, required, validPassword, passwordConfirmed } from '../../utils/validations';
+import { isEmail, required, validPassword, passwordConfirmed } from 'utils/validations';
+import firebase from 'firebase-config';
 
 interface Values {
+    name: string;
     email: string;
     password: string;
     confirm: string;
 }
 
+interface IMessage {
+    success?: boolean;
+    message?: string;
+}
+
 const LoginPage: React.SFC<any> = ({ history }: any) => {
-    const { state, dispatch } = React.useContext(Store);
-    const [signIn, setSignIn] = React.useState(true);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [message, setMessage] = useState<IMessage | null>(null);
+    const [signIn, setSignIn] = useState(true);
     const classes = useStyles();
 
     const handleSubmit = async (values: any, signIn: boolean) => {
-        if (signIn) {
-            let res = null;
-            res = await UserActions.signInUser(dispatch, values);
-            if (res != null) {
+        try {
+            if (signIn) {
+                await firebase.login(values.email, values.password);
                 history.push('/chat');
+            } else {
+                await firebase.register(values.name, values.email, values.password);
+                setMessage({
+                    success: true,
+                    message: 'Please check your email to avtivate your account.',
+                });
             }
+        } catch (error) {
+            setMessage({ success: false, message: error.message });
         }
-        return UserActions.signUpUser(dispatch, values);
     };
+
+    React.useEffect(() => {}, []);
 
     return (
         <Container component="main" maxWidth="xs">
@@ -52,17 +66,16 @@ const LoginPage: React.SFC<any> = ({ history }: any) => {
                 <Typography component="h1" variant="h5">
                     {signIn ? 'Sign in' : 'Sign Up'}
                 </Typography>
-                {state.message && (
-                    <Alert severity={state.message.success ? 'success' : 'error'}>
-                        {state.message.message}
+                {message && (
+                    <Alert severity={message?.success ? 'success' : 'error'}>
+                        {message?.message}
                     </Alert>
                 )}
                 <Formik
                     validateOnBlur
-                    initialValues={{ email: '', password: '', confirm: '' }}
-                    onSubmit={(values: Values, { resetForm, setSubmitting }) => {
+                    initialValues={{ name: '', email: '', password: '', confirm: '' }}
+                    onSubmit={(values: Values, { setSubmitting }) => {
                         handleSubmit({ email: values.email, password: values.password }, signIn);
-                        resetForm({ values: { email: '', password: '', confirm: '' } });
                         setSubmitting(false);
                     }}
                 >
@@ -75,6 +88,19 @@ const LoginPage: React.SFC<any> = ({ history }: any) => {
                         isSubmitting,
                     }) => (
                         <form className={classes.form} noValidate onSubmit={handleSubmit}>
+                            {!signIn && (
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    fullWidth
+                                    name="name"
+                                    label="Name"
+                                    id="name"
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    value={values.name}
+                                />
+                            )}
                             <TextField
                                 variant="outlined"
                                 margin="normal"
@@ -83,13 +109,12 @@ const LoginPage: React.SFC<any> = ({ history }: any) => {
                                 label="Email Address"
                                 name="email"
                                 autoComplete="email"
-                                autoFocus
                                 onChange={handleChange}
                                 onBlur={handleBlur}
                                 value={values.email}
                             />
-                            {(values.email !== '' && required(values.email)) ||
-                            isEmail(values.email) ? (
+                            {(isSubmitted && values.email !== '' && required(values.email)) ||
+                            (isSubmitted && isEmail(values.email)) ? (
                                 <Alert severity="error">
                                     {required(values.email) || isEmail(values.email)}
                                 </Alert>
@@ -108,8 +133,8 @@ const LoginPage: React.SFC<any> = ({ history }: any) => {
                                 value={values.password}
                             />
 
-                            {(touched.password && required(values.password)) ||
-                            validPassword(values.password) ? (
+                            {(isSubmitted && touched.password && required(values.password)) ||
+                            (isSubmitted && validPassword(values.password)) ? (
                                 <Alert severity="error">
                                     {required(values.password) ||
                                         Object.values(
@@ -137,8 +162,9 @@ const LoginPage: React.SFC<any> = ({ history }: any) => {
                                         onBlur={handleBlur}
                                         value={values.confirm}
                                     />
-                                    {(touched.confirm && required(values.confirm)) ||
-                                    passwordConfirmed(values.password, values.confirm) ? (
+                                    {(isSubmitted && touched.confirm && required(values.confirm)) ||
+                                    (isSubmitted &&
+                                        passwordConfirmed(values.password, values.confirm)) ? (
                                         <Alert severity="error">
                                             {required(values.confirm) ||
                                                 passwordConfirmed(values.password, values.confirm)}

@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
     "jsx": "react",
-    "target": "es5",
+    "target": "ES2020",
     "module": "esnext",
+    "noImplicitAny": false,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -17,10 +18,8 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ],
+    "baseUrl": "src",
+    "noEmit": true
   },
   "include": [
     "src"
