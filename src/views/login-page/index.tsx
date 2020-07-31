@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Formik } from 'formik';
-import { withRouter } from 'react-router-dom';
+import React, { useState, useCallback } from 'react';
+import { Formik, FormikHelpers, Field } from 'formik';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
     Avatar,
     Button,
@@ -13,48 +13,44 @@ import {
     Typography,
     Container,
 } from '@material-ui/core';
-import { Alert } from '@material-ui/lab';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import useStyles from './styles';
-import { isEmail, required, validPassword, passwordConfirmed } from 'utils/validations';
+import { validateEmail, validatePassword, validateConfirm } from 'utils/validations';
+import AlertMessage from 'components/alert-message';
+import IMessage from 'interfaces/message-interface';
 import firebase from 'firebase-config';
 
-interface Values {
+interface IValues {
     name: string;
     email: string;
     password: string;
     confirm: string;
 }
 
-interface IMessage {
-    success?: boolean;
-    message?: string;
-}
+interface ILoginProps extends RouteComponentProps<any> {}
 
-const LoginPage: React.SFC<any> = ({ history }: any) => {
-    const [isSubmitted, setIsSubmitted] = useState(false);
-    const [message, setMessage] = useState<IMessage | null>(null);
+const LoginPage: React.FC<ILoginProps> = (props: ILoginProps) => {
+    const [message, setMessage] = useState<IMessage | undefined>();
     const [signIn, setSignIn] = useState(true);
     const classes = useStyles();
 
-    const handleSubmit = async (values: any, signIn: boolean) => {
+    const handleSubmit = useCallback(async (values: IValues, signIn: boolean) => {
         try {
             if (signIn) {
                 await firebase.login(values.email, values.password);
-                history.push('/chat');
+                props.history.push('/chat');
             } else {
                 await firebase.register(values.name, values.email, values.password);
-                setMessage({
-                    success: true,
-                    message: 'Please check your email to avtivate your account.',
-                });
+                props.history.push('/chat');
+                // setMessage({
+                //     status: 'success',
+                //     text: 'Please check your email to avtivate your account.',
+                // });
             }
         } catch (error) {
-            setMessage({ success: false, message: error.message });
+            setMessage({ status: 'error', text: error.message });
         }
-    };
-
-    React.useEffect(() => {}, []);
+    }, []);
 
     return (
         <Container component="main" maxWidth="xs">
@@ -66,28 +62,25 @@ const LoginPage: React.SFC<any> = ({ history }: any) => {
                 <Typography component="h1" variant="h5">
                     {signIn ? 'Sign in' : 'Sign Up'}
                 </Typography>
-                {message && (
-                    <Alert severity={message?.success ? 'success' : 'error'}>
-                        {message?.message}
-                    </Alert>
-                )}
+                {message && <AlertMessage status={message.status} text={message.text} />}
                 <Formik
                     validateOnBlur
                     initialValues={{ name: '', email: '', password: '', confirm: '' }}
-                    onSubmit={(values: Values, { setSubmitting }) => {
-                        handleSubmit({ email: values.email, password: values.password }, signIn);
+                    onSubmit={(values: IValues, { setSubmitting }: FormikHelpers<IValues>) => {
+                        handleSubmit(values, signIn);
                         setSubmitting(false);
                     }}
                 >
                     {({
                         values,
+                        errors,
                         touched,
                         handleChange,
                         handleBlur,
                         handleSubmit,
                         isSubmitting,
                     }) => (
-                        <form className={classes.form} noValidate onSubmit={handleSubmit}>
+                        <form onSubmit={handleSubmit}>
                             {!signIn && (
                                 <TextField
                                     variant="outlined"
@@ -101,75 +94,76 @@ const LoginPage: React.SFC<any> = ({ history }: any) => {
                                     value={values.name}
                                 />
                             )}
-                            <TextField
-                                variant="outlined"
-                                margin="normal"
-                                fullWidth
-                                id="email"
-                                label="Email Address"
+                            <Field
                                 name="email"
-                                autoComplete="email"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
                                 value={values.email}
-                            />
-                            {(isSubmitted && values.email !== '' && required(values.email)) ||
-                            (isSubmitted && isEmail(values.email)) ? (
-                                <Alert severity="error">
-                                    {required(values.email) || isEmail(values.email)}
-                                </Alert>
-                            ) : null}
-                            <TextField
-                                variant="outlined"
-                                margin="normal"
-                                fullWidth
-                                name="password"
-                                label="Password"
-                                id="password"
-                                autoComplete="current-password"
-                                type="password"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                value={values.password}
-                            />
-
-                            {(isSubmitted && touched.password && required(values.password)) ||
-                            (isSubmitted && validPassword(values.password)) ? (
-                                <Alert severity="error">
-                                    {required(values.password) ||
-                                        Object.values(
-                                            validPassword(values.password),
-                                        ).map((val: any) => (
-                                            <Typography
-                                                component="p"
-                                                key={val}
-                                            >{`- ${val}`}</Typography>
-                                        ))}
-                                </Alert>
-                            ) : null}
-                            {!signIn && (
-                                <>
+                                validate={validateEmail}
+                                render={() => (
                                     <TextField
                                         variant="outlined"
                                         margin="normal"
                                         fullWidth
-                                        name="confirm"
-                                        label="Confirm password"
-                                        id="confirm"
-                                        autoComplete="current-confirm"
-                                        type="password"
+                                        id="email"
+                                        label="Email Address"
+                                        type="email"
+                                        autoComplete="email"
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        value={values.confirm}
+                                        name="email"
                                     />
-                                    {(isSubmitted && touched.confirm && required(values.confirm)) ||
-                                    (isSubmitted &&
-                                        passwordConfirmed(values.password, values.confirm)) ? (
-                                        <Alert severity="error">
-                                            {required(values.confirm) ||
-                                                passwordConfirmed(values.password, values.confirm)}
-                                        </Alert>
-                                    ) : null}
+                                )}
+                            />
+
+                            {errors.email && touched.email && (
+                                <AlertMessage status="error" text={errors.email} />
+                            )}
+                            <Field
+                                name="password"
+                                value={values.password}
+                                validate={validatePassword}
+                                render={() => (
+                                    <TextField
+                                        id="password"
+                                        name="password"
+                                        variant="outlined"
+                                        margin="normal"
+                                        fullWidth
+                                        autoComplete="current-password"
+                                        type="password"
+                                        label="Password"
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                    />
+                                )}
+                            />
+                            {errors.password && touched.password && (
+                                <AlertMessage status="error" text={errors.password} />
+                            )}
+                            {!signIn && (
+                                <>
+                                    <Field
+                                        name="confirm"
+                                        value={values.confirm}
+                                        validate={(value) =>
+                                            validateConfirm(values.password, value)
+                                        }
+                                        render={() => (
+                                            <TextField
+                                                variant="outlined"
+                                                margin="normal"
+                                                fullWidth
+                                                name="confirm"
+                                                label="Confirm password"
+                                                id="confirm"
+                                                type="password"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                            />
+                                        )}
+                                    />
+                                    {touched.confirm && errors.confirm && (
+                                        <AlertMessage status="error" text={errors.confirm} />
+                                    )}
                                 </>
                             )}
                             {signIn && (

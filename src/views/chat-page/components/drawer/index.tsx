@@ -4,12 +4,12 @@ import { Drawer, Divider, IconButton } from '@material-ui/core';
 import { ChevronLeft as ChevronLeftIcon } from '@material-ui/icons';
 import useStyles from './styles';
 
-export interface IProps {
+export interface IDrawerProps {
     handleDrawerClose: () => void;
     open: boolean;
 }
 
-export default function App(props: IProps) {
+export default function App(props: IDrawerProps) {
     const classes = useStyles();
     return (
         <Drawer

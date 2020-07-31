@@ -22,7 +22,7 @@ interface IProfileProps extends RouteComponentProps<any> {}
 
 const getUser = async () => await firebase.getCurrentUser();
 
-const ProfilePage: React.FC<any> = (props: IProfileProps) => {
+const ProfilePage: React.FC<IProfileProps> = (props: IProfileProps) => {
     const classes = useStyles();
     const [name, setName] = useState<string | undefined>();
     const [message, setMessage] = useState<any>();

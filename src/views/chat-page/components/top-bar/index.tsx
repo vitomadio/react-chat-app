@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import clsx from 'clsx';
 import { AppBar, Toolbar, Typography, IconButton, Badge } from '@material-ui/core';
-import { withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
     Menu as MenuIcon,
     Notifications as NotificationsIcon,
@@ -12,18 +12,17 @@ import IUser from 'interfaces/user-interface';
 import useStyles from './styles';
 import firebase from 'firebase-config';
 
-export interface IProps {
+export interface ITopBarProps extends RouteComponentProps<any> {
     handleDrawerOpen: () => void;
     open: boolean;
 }
 
-const TopBar: React.SFC<any> = ({ history }, props: IProps) => {
+const TopBar: React.FC<ITopBarProps> = (props: ITopBarProps) => {
     const classes = useStyles();
-    const [user, setUser] = useState<IUser | null | undefined>(firebase.getCurrentUser());
 
     const handleLogOut = async () => {
         await firebase.logout();
-        history.replace('/');
+        props.history.replace('/');
     };
 
     return (
@@ -48,9 +47,9 @@ const TopBar: React.SFC<any> = ({ history }, props: IProps) => {
                     noWrap
                     className={classes.title}
                 >
-                    Dashboard
+                    Chat
                 </Typography>
-                <IconButton color="inherit" onClick={() => history.push('/profile')}>
+                <IconButton color="inherit" onClick={() => props.history.push('/profile')}>
                     <PersonIcon fontSize="large" />
                 </IconButton>
                 <IconButton color="inherit">

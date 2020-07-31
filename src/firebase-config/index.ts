@@ -3,7 +3,6 @@ import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firebase-firestore';
 import 'firebase/firebase-storage';
-import IUser from 'interfaces/user-interface';
 
 // Your web app's Firebase configuration
 const config = {
@@ -29,8 +28,8 @@ class Firebase {
         this.storage = app.storage();
     }
 
-    login(email: string, password: string) {
-        return this.auth.signInWithEmailAndPassword(email, password);
+    async login(email: string, password: string) {
+        return await this.auth.signInWithEmailAndPassword(email, password);
     }
 
     logout() {
@@ -75,8 +74,8 @@ class Firebase {
                 const fileRef = storageRef.child(`images/${file?.name}`);
                 const { metadata } = await fileRef.put(file);
                 this.updatePhotoUrl(metadata.fullPath);
-                return { status: 'success', text: 'Your profile has been updated' };
             }
+            return { status: 'success', text: 'Your profile has been updated' };
         } catch (err) {
             return { status: 'error', text: err };
         }

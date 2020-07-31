@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { Alert } from '@material-ui/lab';
-
-interface IMessage {
-    status: 'error' | 'info' | 'success' | 'warning' | undefined;
-    text: string;
-}
+import IMessage from 'interfaces/message-interface';
 
 const AlertMessage: React.FC<IMessage> = ({ status, text }: IMessage) => {
-    const [alertMessage, setAlertMessage] = useState<IMessage | undefined>();
-
     return (
         <>
-            <Alert severity={status}>{text}</Alert>
+            <Alert severity={status}>
+                <p>{text}</p>
+            </Alert>
         </>
     );
 };
