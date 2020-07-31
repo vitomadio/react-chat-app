@@ -28,6 +28,11 @@ export default makeStyles((theme) => ({
         display: 'none',
     },
     title: {
-        flexGrow: 1,
+        flex: 1,
+    },
+    iconsWrapper: {
+        flex: 1,
+        display: 'flex',
+        justifyContent: 'flex-end',
     },
 }));

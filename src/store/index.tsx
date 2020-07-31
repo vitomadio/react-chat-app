@@ -1,28 +1,26 @@
 import React, { ReactChild } from 'react';
+import { ChatUserReducer } from './chat-user-state';
+import { UsersReducer } from './users-state';
+import IAction from 'interfaces/action-interface';
 
 const initialState: any = {
-    user: null,
-    message: null,
+    users: [],
+    chatUser: null,
 };
-
-interface IAction {
-    type: string;
-    payload: any;
-}
 
 export const Store = React.createContext<any>(initialState);
 
-const rootReducer = (state: any, action: IAction) => {
-    switch (action.type) {
-        default:
-            return state;
-    }
-};
+// const rootReducer = (state: any, action: IAction) => {
+//     switch (action.type) {
+//         default:
+//             return state;
+//     }
+// };
 
-// const reduceReducers = (...reducers: Array<any>) => (state: any, action: any) =>
-//     reducers.reduce((acc, nextReducer) => nextReducer(acc, action), state);
+const reduceReducers = (...reducers: Array<any>) => (state: any, action: IAction) =>
+    reducers.reduce((acc, nextReducer) => nextReducer(acc, action), state);
 
-// const rootReducer = reduceReducers(userReducer, messageReducer);
+const rootReducer = reduceReducers(UsersReducer, ChatUserReducer);
 
 type Props = {
     children: ReactChild | NameChildrenSlots;

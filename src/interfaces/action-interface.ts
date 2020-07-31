@@ -1,4 +1,4 @@
-export default interface IDispatch {
+export default interface IAction {
     type: string;
     payload: any;
 }
