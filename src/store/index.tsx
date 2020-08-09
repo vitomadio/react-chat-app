@@ -6,6 +6,9 @@ import IAction from 'interfaces/action-interface';
 const initialState: any = {
     users: [],
     chatUser: null,
+    currentUser: null,
+    messages: [],
+    chatUsers: [],
 };
 
 export const Store = React.createContext<any>(initialState);

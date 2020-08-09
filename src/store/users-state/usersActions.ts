@@ -8,4 +8,13 @@ const getAllUsers = async (dispatch: (args: IAction) => IAction) =>
         payload: await firebase.getUsers(),
     });
 
-export default { getAllUsers };
+const getCurrentUser = async (dispatch: (args: IAction) => IAction): Promise<any> =>
+    dispatch({
+        type: TYPES.GET_CURRENT_USER,
+        payload: await firebase.getCurrentUser(),
+    });
+
+const getChatUsers = (currentUserId: string, dispatch: (args: IAction) => IAction): void =>
+    firebase.getChatUsers(currentUserId, dispatch);
+
+export default { getAllUsers, getCurrentUser, getChatUsers };

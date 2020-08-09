@@ -12,6 +12,7 @@ import {
     Box,
 } from '@material-ui/core';
 import { ChevronLeft as ChevronLeftIcon, Search as SearchIcon } from '@material-ui/icons';
+import UsersList from './components/users-list';
 import firebase from 'firebase-config';
 import IUser from 'interfaces/user-interface';
 import { ChatUserActions } from 'store/chat-user-state';
@@ -61,36 +62,35 @@ export default function App(props: IDrawerProps) {
                 />
             </div>
             <Divider />
-            <List component="nav" aria-label="secondary mailbox folders">
-                {state.users &&
-                    currentUser &&
-                    state.users
-                        ?.filter((user) => user.uid !== currentUser?.uid)
-                        .map((user) => (
-                            <ListItem
-                                key={user.uid}
-                                button
-                                onClick={() =>
-                                    ChatUserActions.setChatUser(currentUser, user, dispatch)
-                                }
-                            >
-                                <Box mr={2}>
-                                    {user?.photoURL ? (
-                                        <Avatar
-                                            alt={user?.displayName || user?.email || undefined}
-                                            src={user?.photoURL || undefined}
-                                            className={classes.small}
-                                        />
-                                    ) : (
-                                        <Avatar className={clsx(classes.orange, classes.small)}>
-                                            {user?.displayName?.slice(0, 2)}
-                                        </Avatar>
-                                    )}
-                                </Box>
-                                <ListItemText primary={user.displayName || user.email} />
-                            </ListItem>
-                        ))}
-            </List>
+            {state.users && currentUser && state.chatUser && (
+                <>
+                    <List component="nav" aria-label="secondary mailbox folders">
+                        {state.users
+                            .filter((user) => user.uid !== currentUser?.uid)
+                            ?.filter(
+                                (user) =>
+                                    state.chatUsers.includes(user.uid) ||
+                                    user.uid === state.chatUser.uid,
+                            )
+                            .map((user) => (
+                                <UsersList user={user} currentUser={currentUser} />
+                            ))}
+                    </List>
+                    <Divider />
+                    <List component="nav" aria-label="secondary mailbox folders">
+                        {state.users
+                            .filter((user) => user.uid !== currentUser?.uid)
+                            ?.filter(
+                                (user) =>
+                                    !state.chatUsers.includes(user.uid) &&
+                                    user.uid !== state.chatUser.uid,
+                            )
+                            .map((user) => (
+                                <UsersList user={user} currentUser={currentUser} />
+                            ))}
+                    </List>
+                </>
+            )}
         </Drawer>
     );
 }

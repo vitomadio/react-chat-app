@@ -20,8 +20,6 @@ import useStyles from './styles';
 
 interface IProfileProps extends RouteComponentProps<any> {}
 
-const getUser = async () => await firebase.getCurrentUser();
-
 const ProfilePage: React.FC<IProfileProps> = (props: IProfileProps) => {
     const classes = useStyles();
     const [name, setName] = useState<string | undefined>();
@@ -42,10 +40,13 @@ const ProfilePage: React.FC<IProfileProps> = (props: IProfileProps) => {
         }, 3000);
     };
 
-    const uploadFile = async (file: File) => {
-        const url = URL.createObjectURL(file);
-        setFile(file);
-        setImagePreview(url);
+    const uploadFile = (e: ChangeEvent<HTMLInputElement>): void => {
+        e.preventDefault();
+        if (e.target.files) {
+            const url = URL.createObjectURL(e.target.files[0]);
+            setFile(e.target.files[0]);
+            setImagePreview(url);
+        }
     };
 
     return (
@@ -68,50 +69,35 @@ const ProfilePage: React.FC<IProfileProps> = (props: IProfileProps) => {
                 <Paper className={classes.paper}>
                     <Grid container alignItems="center" direction="column" spacing={2}>
                         <Grid item>
-                            {user &&
-                                (imagePreview || user.photoURL ? (
-                                    <div className={classes.avatarWrapper}>
-                                        <input
-                                            id="raised-button-file"
-                                            type="file"
-                                            accept="image/.jpg,.png,.jpeg"
-                                            className={classes.fileInput}
-                                            onChange={(e: any) => uploadFile(e.target.files[0])}
+                            {user && (
+                                <div className={classes.avatarWrapper}>
+                                    <input
+                                        id="raised-button-file"
+                                        type="file"
+                                        accept="image/.jpg,.png,.jpeg"
+                                        className={classes.fileInput}
+                                        onChange={uploadFile}
+                                    />
+                                    <label htmlFor="raised-button-file">
+                                        <EditIcon
+                                            color="primary"
+                                            fontSize="large"
+                                            className={classes.editIcon}
                                         />
-                                        <label htmlFor="raised-button-file">
-                                            <EditIcon
-                                                color="primary"
-                                                fontSize="large"
-                                                className={classes.editIcon}
-                                            />
-                                        </label>
+                                    </label>
+                                    {imagePreview || user.photoURL ? (
                                         <Avatar
                                             alt={user?.displayName || user?.email || undefined}
                                             src={imagePreview || user.photoURL || undefined}
                                             className={classes.large}
                                         />
-                                    </div>
-                                ) : (
-                                    <div className={classes.avatarWrapper}>
-                                        <input
-                                            id="raised-button-file"
-                                            type="file"
-                                            accept="image/.jpg,.png,.jpeg"
-                                            className={classes.fileInput}
-                                            onChange={(e: any) => uploadFile(e.target.files[0])}
-                                        />
-                                        <label htmlFor="raised-button-file">
-                                            <EditIcon
-                                                color="primary"
-                                                fontSize="large"
-                                                className={classes.editIcon}
-                                            />
-                                        </label>
+                                    ) : (
                                         <Avatar className={clsx(classes.orange, classes.large)}>
                                             {user?.displayName?.slice(0, 2)}
                                         </Avatar>
-                                    </div>
-                                ))}
+                                    )}
+                                </div>
+                            )}
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
@@ -155,7 +141,11 @@ const ProfilePage: React.FC<IProfileProps> = (props: IProfileProps) => {
                                     </Button>
                                 </Grid>
                                 <Grid item>
-                                    <Button variant="contained" color="secondary">
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        onClick={() => props.history.goBack()}
+                                    >
                                         Cancel
                                     </Button>
                                 </Grid>

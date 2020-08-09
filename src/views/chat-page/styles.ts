@@ -1,44 +1,9 @@
 import { makeStyles } from '@material-ui/core';
 
-const drawerWidth = 300;
-
 export default makeStyles((theme) => ({
     root: {
         display: 'flex',
         maxHeight: '100vh',
-    },
-    toolbarIcon: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: '0 8px',
-        ...theme.mixins.toolbar,
-    },
-    menuButton: {
-        marginRight: 36,
-    },
-    menuButtonHidden: {
-        display: 'none',
-    },
-    drawerPaper: {
-        position: 'relative',
-        whiteSpace: 'nowrap',
-        width: drawerWidth,
-        transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-    },
-    drawerPaperClose: {
-        overflowX: 'hidden',
-        transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        }),
-        width: theme.spacing(7),
-        [theme.breakpoints.up('sm')]: {
-            width: theme.spacing(9),
-        },
     },
     appBarSpacer: theme.mixins.toolbar,
     content: {
@@ -53,28 +18,45 @@ export default makeStyles((theme) => ({
     },
     chatContainer: {
         flexGrow: 1,
-        padding: theme.spacing(2),
         borderBottom: `1px solid ${theme.palette.grey[700]}`,
+        overflowY: 'auto',
+    },
+    messageGrid: {
+        cursor: 'pointer',
+        '&:hover': {
+            backgroundColor: theme.palette.grey[800],
+        },
+        padding: theme.spacing(1),
     },
     receivedMessagePaper: {
         backgroundColor: '#9fa8da',
         maxWidth: '60%',
         padding: theme.spacing(1),
         float: 'left',
-        marginBottom: theme.spacing(2),
     },
     sentMessagePaper: {
         backgroundColor: '#7986cb',
         maxWidth: '60%',
         padding: theme.spacing(1),
         float: 'right',
-        marginBottom: theme.spacing(2),
     },
     chatInput: {
         padding: theme.spacing(2),
         flex: 1,
     },
+    formControl: {
+        display: 'flex',
+        flexDirection: 'row',
+    },
     inputField: {
-        boxShadow: 'inset 0 0 5px rgba(0,0,0,.6)',
+        flexGrow: 1,
+        marginRight: theme.spacing(2),
+    },
+    submit: {
+        flex: 1,
+        width: 60,
+        height: 60,
+        maxWidth: 60,
+        borderRadius: '50%',
     },
 }));

@@ -33,4 +33,12 @@ function validateConfirm(pass, value) {
     return error;
 }
 
-export { validateEmail, validatePassword, validateConfirm };
+function isRequired(value) {
+    let error;
+    if (!value) {
+        error = 'Required';
+    }
+    return error;
+}
+
+export { validateEmail, validatePassword, validateConfirm, isRequired };

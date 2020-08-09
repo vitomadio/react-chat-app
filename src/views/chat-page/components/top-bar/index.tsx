@@ -10,10 +10,9 @@ import {
 } from '@material-ui/icons';
 import firebase from 'firebase-config';
 import { Store } from 'store';
-import { ChatUserActions } from 'store/chat-user-state';
-import IUser from 'interfaces/user-interface';
 
 import useStyles from './styles';
+import { ChatUserActions } from 'store/chat-user-state';
 
 export interface ITopBarProps extends RouteComponentProps<any> {
     handleDrawerOpen: () => void;
@@ -23,16 +22,16 @@ export interface ITopBarProps extends RouteComponentProps<any> {
 const TopBar: React.FC<ITopBarProps> = (props: ITopBarProps) => {
     const classes = useStyles();
     const { state, dispatch } = React.useContext(Store);
-    const [currentUser, setCurrentUser] = useState<IUser | null>(firebase.getCurrentUser());
 
     const handleLogOut = async () => {
         await firebase.logout();
         props.history.replace('/');
     };
 
-    useEffect(() => {
-        if (currentUser) ChatUserActions.getInitialChatUser(currentUser, dispatch);
-    }, []);
+    const handleGoToProfile = () => {
+        ChatUserActions.resetChatMessages(dispatch);
+        props.history.push('/profile');
+    };
 
     return (
         <AppBar
@@ -54,7 +53,7 @@ const TopBar: React.FC<ITopBarProps> = (props: ITopBarProps) => {
                 </Typography>
 
                 <div className={classes.iconsWrapper}>
-                    <IconButton color="inherit" onClick={() => props.history.push('/profile')}>
+                    <IconButton color="inherit" onClick={handleGoToProfile}>
                         <PersonIcon fontSize="large" />
                     </IconButton>
                     <IconButton color="inherit">

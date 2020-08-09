@@ -6,6 +6,10 @@ const UsersReducer = (state, action: IAction) => {
     switch (action.type) {
         case TYPES.GET_ALL_USERS:
             return { ...state, users: action.payload };
+        case TYPES.GET_CURRENT_USER:
+            return { ...state, currentUser: action.payload };
+        case TYPES.GET_CHAT_USERS:
+            return { ...state, chatUsers: [...state.chatUsers, action.payload] };
         default:
             return state;
     }

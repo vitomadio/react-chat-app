@@ -5,6 +5,10 @@ import 'firebase/firebase-firestore';
 import 'firebase/firebase-storage';
 import 'firebase/firebase-database';
 import IUser from 'interfaces/user-interface';
+import IChat from 'interfaces/chat-interface';
+import IMessage from 'interfaces/message-interface';
+import IAction from 'interfaces/action-interface';
+import TYPES from 'store/action-types';
 
 // Your web app's Firebase configuration
 const config = {
@@ -32,37 +36,43 @@ class Firebase {
         this.storage = app.storage();
     }
 
-    async login(email: string, password: string) {
+    login = async (email: string, password: string): Promise<any> => {
         return await this.auth.signInWithEmailAndPassword(email, password);
-    }
+    };
 
-    logout() {
-        return this.auth.signOut();
-    }
+    logout = (): void => {
+        this.auth.signOut();
+    };
 
-    async register(name: string, email: string, password: string) {
-        const { user } = await this.auth.createUserWithEmailAndPassword(email, password);
-        await this.auth.currentUser?.updateProfile({
-            displayName: name,
-        });
-        if (user) {
-            return await this.db.collection('Users').doc(`${user.uid}`).set({
-                displayName: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-                emailVerified: user.emailVerified,
-                uid: user.uid,
+    public register = async (
+        name: string,
+        email: string,
+        password: string,
+    ): Promise<any | IMessage> => {
+        try {
+            const { user } = await this.auth.createUserWithEmailAndPassword(email, password);
+            await this.auth.currentUser?.updateProfile({
+                displayName: name,
             });
+            return await this.db.collection('Users').doc(`${user?.uid}`).set({
+                displayName: user?.displayName,
+                email: user?.email,
+                photoURL: user?.photoURL,
+                emailVerified: user?.emailVerified,
+                uid: user?.uid,
+            });
+        } catch (err) {
+            return { status: 'error', text: err };
         }
-    }
+    };
 
-    isInitialized() {
+    public isInitialized(): Promise<any> {
         return new Promise((resolve) => {
             this.auth.onAuthStateChanged(resolve);
         });
     }
 
-    updatePhotoUrl = (fullPath: string) => {
+    private updateProfileAvatar = (fullPath: string): void => {
         const storageRef = this.storage.ref();
         storageRef
             .child(fullPath)
@@ -73,7 +83,10 @@ class Firebase {
             });
     };
 
-    updateUserProfile = async (file: File | undefined, name: string | undefined) => {
+    public updateUserProfile = async (
+        file: File | undefined,
+        name: string | undefined,
+    ): Promise<IMessage> => {
         try {
             if (name) {
                 this.auth.currentUser?.updateProfile({ displayName: name });
@@ -82,7 +95,7 @@ class Firebase {
                 const storageRef = this.storage.ref();
                 const fileRef = storageRef.child(`images/${file?.name}`);
                 const { metadata } = await fileRef.put(file);
-                this.updatePhotoUrl(metadata.fullPath);
+                this.updateProfileAvatar(metadata.fullPath);
             }
             return { status: 'success', text: 'Your profile has been updated' };
         } catch (err) {
@@ -90,11 +103,21 @@ class Firebase {
         }
     };
 
-    getCurrentUser() {
-        return this.auth.currentUser;
-    }
+    getCurrentUser = (): IUser | null => {
+        const user = this.auth.currentUser;
+        if (user != null) {
+            return {
+                displayName: user.displayName,
+                email: user.email,
+                photoURL: user.photoURL,
+                emailVerified: user.emailVerified,
+                uid: user.uid,
+            };
+        }
+        return null;
+    };
 
-    getUsers = async () => {
+    getUsers = async (): Promise<IUser[]> => {
         const users = await this.db.collection('Users').get();
         const usersList: IUser[] = [];
         users.forEach((user) => {
@@ -103,25 +126,83 @@ class Firebase {
         return usersList;
     };
 
-    setCurrentChatUser = async (currentUser: IUser, chatUser: IUser) => {
+    public getCurrentChatUser = async (userId: string): Promise<any> => {
+        const res = await this.rtdb.ref(`/current-user-chat/${userId}`).once('value');
+        return res.val();
+    };
+
+    public getChatUsers = (currentUserId: string, dispatch: (args: IAction) => IAction): any => {
         try {
-            const ref = await this.rtdb.ref(`/current-user-chat/${currentUser.uid}`).once('value');
-            console.log(ref.val());
-            if (ref.val()) {
-                await this.rtdb.ref(`/current-user-chat/${currentUser.uid}`).update(chatUser);
-            } else {
-                await this.rtdb.ref(`/current-user-chat/${currentUser.uid}`).set(chatUser);
-            }
-            if (currentUser.uid) return await this.getCurrentChatUser(currentUser.uid);
-            return null;
+            this.rtdb.ref(`users-chats/${currentUserId}`).on('child_added', (snapshot) => {
+                dispatch({
+                    type: TYPES.GET_CHAT_USERS,
+                    payload: snapshot.key,
+                });
+            });
         } catch (err) {
-            console.log(err);
+            throw err;
         }
     };
 
-    getCurrentChatUser = async (userId: string) => {
-        const res = await this.rtdb.ref(`/current-user-chat/${userId}`).once('value');
-        return res.val();
+    public setCurrentChatUser = async (currentUser: IUser, chatUser: IUser): Promise<any> => {
+        try {
+            this.rtdb.ref(`/current-user-chat/${currentUser.uid}`).set(chatUser);
+            if (currentUser.uid) return await this.getCurrentChatUser(currentUser.uid);
+            return null;
+        } catch (err) {
+            throw err;
+        }
+    };
+
+    public getCurrentChat = async (
+        senderId: string,
+        receiverId: string,
+        dispatch: (args: IAction) => IAction,
+    ): Promise<any> => {
+        await this.rtdb
+            .ref(`users-chats/${senderId}/${receiverId}`)
+            .on('child_added', (snapshot) => {
+                dispatch({
+                    type: TYPES.GET_CHAT_MESSAGES,
+                    payload: { ...snapshot.val(), chatId: snapshot.key },
+                });
+            });
+    };
+
+    public addNewMessageToChat = (chat: IChat): any => {
+        try {
+            const chatKey = this.rtdb.ref(`/users-chats/${chat.senderId}/${chat.receiverId}`).push()
+                .key;
+            if (chatKey) {
+                this.rtdb
+                    .ref(`/users-chats/${chat.senderId}/${chat.receiverId}`)
+                    .child(chatKey)
+                    .set(chat);
+                this.rtdb
+                    .ref(`/users-chats/${chat.receiverId}/${chat.senderId}`)
+                    .child(chatKey)
+                    .set(chat);
+            }
+        } catch (err) {
+            throw err;
+        }
+    };
+
+    public deleteMessage = async (
+        chat: IChat,
+        messageWriter: string,
+    ): Promise<string | undefined> => {
+        let reference = `users-chats/${chat.senderId}/${chat.receiverId}/${chat.chatId}`;
+        if (messageWriter === 'receiver') {
+            reference = `users-chats/${chat.receiverId}/${chat.senderId}/${chat.chatId}`;
+        }
+        try {
+            const chatRef = await this.rtdb.ref(reference);
+            chatRef.remove();
+            return chat.chatId;
+        } catch (err) {
+            throw err;
+        }
     };
 }
 

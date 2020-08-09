@@ -68,11 +68,4 @@ export default makeStyles((theme) => ({
             width: '20ch',
         },
     },
-    orange: {
-        backgroundColor: 'orange',
-    },
-    small: {
-        width: theme.spacing(5),
-        height: theme.spacing(5),
-    },
 }));
