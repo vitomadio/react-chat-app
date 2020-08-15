@@ -5,10 +5,11 @@ import IAction from 'interfaces/action-interface';
 
 const initialState: any = {
     users: [],
-    chatUser: null,
+    usersWithChats: [],
     currentUser: null,
     messages: [],
     chatUsers: [],
+    userChats: [],
 };
 
 export const Store = React.createContext<any>(initialState);

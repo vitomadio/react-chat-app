@@ -3,5 +3,5 @@ export default interface IUser {
     email?: string | null;
     photoURL?: string | null;
     emailVerified?: boolean;
-    uid?: string;
+    uid: string;
 }

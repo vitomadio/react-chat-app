@@ -4,15 +4,12 @@ import IUser from 'interfaces/user-interface';
 import firebase from 'firebase-config';
 import IChat from 'interfaces/chat-interface';
 
-const setChatUser = async (
-    currentUser: IUser,
-    chatUser: IUser,
-    dispatch: (args: IAction) => IAction,
-) =>
-    dispatch({
-        type: TYPES.SET_CHAT_USER,
-        payload: await firebase.setCurrentChatUser(currentUser, chatUser),
-    });
+const setChatUser = async (currentUser: IUser, userWithChats: IUser) =>
+    firebase.setCurrentChatUser(currentUser, userWithChats);
+
+const setChatAsRead = async (currentUserId: string, chatUserId: string): Promise<void> => {
+    firebase.setChatAsRead(currentUserId, chatUserId);
+};
 
 const resetChatMessages = (dispatch: (args: IAction) => IAction): void => {
     dispatch({
@@ -22,10 +19,7 @@ const resetChatMessages = (dispatch: (args: IAction) => IAction): void => {
 };
 
 const getInitialChatUser = async (currentUser: IUser, dispatch: (args: IAction) => IAction) =>
-    dispatch({
-        type: TYPES.SET_CHAT_USER,
-        payload: currentUser.uid && (await firebase.getCurrentChatUser(currentUser.uid)),
-    });
+    firebase.getCurrentChatUser(currentUser.uid, dispatch);
 
 const getCurrentChat = async (
     currentUserId: string,
@@ -33,6 +27,13 @@ const getCurrentChat = async (
     dispatch: (args: IAction) => IAction,
 ) => {
     firebase.getCurrentChat(currentUserId, chatUserId, dispatch);
+};
+
+const getUsersWithChats = async (
+    currentUserId: string,
+    dispatch: (args: IAction) => IAction,
+): Promise<void> => {
+    firebase.getUserChats(currentUserId, dispatch);
 };
 
 const sendMessage = async (chat: IChat): Promise<void> => {
@@ -50,11 +51,20 @@ const deleteMessage = async (
     });
 };
 
+const deleteChat = async (
+    currentUser: IUser,
+    chatUser: IUser,
+    dispatch: (args: IAction) => IAction,
+): Promise<void> => firebase.deleteChat(currentUser, chatUser, dispatch);
+
 export default {
     setChatUser,
+    setChatAsRead,
     resetChatMessages,
     getCurrentChat,
+    getUsersWithChats,
     sendMessage,
     getInitialChatUser,
     deleteMessage,
+    deleteChat,
 };

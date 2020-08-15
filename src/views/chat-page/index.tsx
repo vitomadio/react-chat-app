@@ -68,12 +68,14 @@ const ChatPage: React.FC = () => {
         if (state.currentUser) {
             ChatUserActions.getInitialChatUser(state.currentUser, dispatch);
             UsersActions.getChatUsers(state.currentUser?.uid, dispatch);
+            ChatUserActions.getUsersWithChats(state.currentUser.uid, dispatch);
         }
     }, [state.currentUser && state.currentUser.uid]);
 
     useEffect(() => {
-        if (state.chatUser?.uid) {
+        if (state.chatUser?.uid && !state.messages.length) {
             ChatUserActions.getCurrentChat(state.currentUser.uid, state.chatUser.uid, dispatch);
+            ChatUserActions.setChatAsRead(state.currentUser.uid, state.chatUser.uid);
         }
     }, [state.chatUser && state.chatUser.uid]);
 

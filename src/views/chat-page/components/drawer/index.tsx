@@ -12,10 +12,9 @@ import {
     Box,
 } from '@material-ui/core';
 import { ChevronLeft as ChevronLeftIcon, Search as SearchIcon } from '@material-ui/icons';
-import UsersList from './components/users-list';
+import UserItem from './components/users-list';
 import firebase from 'firebase-config';
 import IUser from 'interfaces/user-interface';
-import { ChatUserActions } from 'store/chat-user-state';
 import { UsersActions } from 'store/users-state';
 import { Store } from 'store';
 
@@ -62,31 +61,28 @@ export default function App(props: IDrawerProps) {
                 />
             </div>
             <Divider />
-            {state.users && currentUser && state.chatUser && (
+            {state.users && currentUser && state.usersWithChats && (
                 <>
                     <List component="nav" aria-label="secondary mailbox folders">
-                        {state.users
-                            .filter((user) => user.uid !== currentUser?.uid)
-                            ?.filter(
-                                (user) =>
-                                    state.chatUsers.includes(user.uid) ||
-                                    user.uid === state.chatUser.uid,
-                            )
-                            .map((user) => (
-                                <UsersList user={user} currentUser={currentUser} />
-                            ))}
+                        {state.usersWithChats.map((user) => (
+                            <UserItem
+                                key={user.uid}
+                                user={user}
+                                currentUser={currentUser}
+                                activeChat
+                            />
+                        ))}
                     </List>
                     <Divider />
                     <List component="nav" aria-label="secondary mailbox folders">
                         {state.users
-                            .filter((user) => user.uid !== currentUser?.uid)
-                            ?.filter(
+                            .filter(
                                 (user) =>
-                                    !state.chatUsers.includes(user.uid) &&
-                                    user.uid !== state.chatUser.uid,
+                                    user.uid !== currentUser.uid &&
+                                    !state.usersWithChats.some((u) => u.uid === user.uid),
                             )
                             .map((user) => (
-                                <UsersList user={user} currentUser={currentUser} />
+                                <UserItem key={user.uid} user={user} currentUser={currentUser} />
                             ))}
                     </List>
                 </>
