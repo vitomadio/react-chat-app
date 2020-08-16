@@ -27,6 +27,10 @@ const ChatPage: React.FC = () => {
         setModalOpen(false);
     };
 
+    const handleOnClick = () => {
+        ChatUserActions.setChatAsRead(state.currentUser.uid, state.usersWithChats[0]?.uid);
+    };
+
     const handleDeleteMessage = () => {
         if (messageSelected && messageWriter) {
             ChatUserActions.deleteMessage(messageSelected, messageWriter, dispatch);
@@ -74,7 +78,12 @@ const ChatPage: React.FC = () => {
                 <main className={classes.content}>
                     <div className={classes.appBarSpacer} />
                     <Container maxWidth="lg" className={classes.container} disableGutters>
-                        <Grid item xs={12} className={classes.chatContainer}>
+                        <Grid
+                            item
+                            xs={12}
+                            className={classes.chatContainer}
+                            onClick={handleOnClick}
+                        >
                             {state.usersWithChats?.length > 0 &&
                                 state.messages
                                     .filter(

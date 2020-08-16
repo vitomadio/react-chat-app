@@ -58,7 +58,10 @@ const TopBar: React.FC<ITopBarProps> = (props: ITopBarProps) => {
                 >
                     <MenuIcon />
                 </IconButton>
-                <IconButton onClick={props.handleDrawerClose}>
+                <IconButton
+                    onClick={props.handleDrawerClose}
+                    className={clsx(classes.menuButton, !props.open && classes.menuButtonHidden)}
+                >
                     <ChevronLeftIcon />
                 </IconButton>
                 <Typography component="span" variant="h5" color="inherit" className={classes.title}>
