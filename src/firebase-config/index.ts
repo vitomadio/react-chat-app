@@ -37,11 +37,11 @@ class FirebaseClass {
         this.storage = app.storage();
     }
 
-    login = async (email: string, password: string): Promise<any> => {
+    public login = async (email: string, password: string): Promise<any> => {
         return await this.auth.signInWithEmailAndPassword(email, password);
     };
 
-    logout = (): void => {
+    public logout = (): void => {
         this.auth.signOut();
     };
 
@@ -104,7 +104,7 @@ class FirebaseClass {
         }
     };
 
-    getCurrentUser = (): IUser | null => {
+    public getCurrentUser = (): IUser | null => {
         const user = this.auth.currentUser;
         if (user != null) {
             return {
@@ -118,7 +118,7 @@ class FirebaseClass {
         return null;
     };
 
-    getUsers = async (): Promise<IUser[]> => {
+    public getUsers = async (): Promise<IUser[]> => {
         const users = await this.db.collection('Users').get();
         const usersList: IUser[] = [];
         users.forEach((user) => {
