@@ -3,7 +3,6 @@ image: node:6.14.6
 pages:
     script:
         - npm install
-        - CI=true npm test
         - CI=true npm run build
         - rm -Rf $CI_PROJECT_DIR/public/*
         - mv build/* $CI_PROJECT_DIR/public/
