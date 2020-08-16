@@ -7,6 +7,7 @@ import {
     Notifications as NotificationsIcon,
     ExitToApp as ExitIcon,
     Person as PersonIcon,
+    ChevronLeft as ChevronLeftIcon,
 } from '@material-ui/icons';
 import firebase from 'firebase-config';
 import { Store } from 'store';
@@ -16,12 +17,21 @@ import { ChatUserActions } from 'store/chat-user-state';
 
 export interface ITopBarProps extends RouteComponentProps<any> {
     handleDrawerOpen: () => void;
+    handleDrawerClose: () => void;
     open: boolean;
 }
 
 const TopBar: React.FC<ITopBarProps> = (props: ITopBarProps) => {
     const classes = useStyles();
     const { state, dispatch } = React.useContext(Store);
+    const [newMessages, setNewMessages] = useState<number>(0);
+
+    useEffect(() => {
+        if (state.userChats.length > 0) {
+            const newMsgs = state.userChats.filter((chat) => !chat.read).length;
+            setNewMessages(newMsgs);
+        }
+    }, [JSON.stringify(state.userChats), state.currentUser?.uid]);
 
     const handleLogOut = async () => {
         await firebase.logout();
@@ -48,19 +58,27 @@ const TopBar: React.FC<ITopBarProps> = (props: ITopBarProps) => {
                 >
                     <MenuIcon />
                 </IconButton>
+                <IconButton onClick={props.handleDrawerClose}>
+                    <ChevronLeftIcon />
+                </IconButton>
                 <Typography component="span" variant="h5" color="inherit" className={classes.title}>
-                    {state.chatUser?.displayName || state.chatUser?.email}
+                    {state.usersWithChats[0]?.displayName || state.usersWithChats[0]?.email}
                 </Typography>
 
                 <div className={classes.iconsWrapper}>
+                    <Typography component="span">{`Hello ${
+                        state.currentUser?.displayName || state.currentUser?.email
+                    }!`}</Typography>
                     <IconButton color="inherit" onClick={handleGoToProfile}>
                         <PersonIcon fontSize="large" />
                     </IconButton>
-                    <IconButton color="inherit">
-                        <Badge badgeContent={4} color="secondary">
-                            <NotificationsIcon fontSize="large" />
-                        </Badge>
-                    </IconButton>
+                    {newMessages > 0 && (
+                        <IconButton color="inherit">
+                            <Badge badgeContent={newMessages} color="secondary">
+                                <NotificationsIcon fontSize="large" />
+                            </Badge>
+                        </IconButton>
+                    )}
                     <IconButton
                         color="inherit"
                         onClick={(e) => {

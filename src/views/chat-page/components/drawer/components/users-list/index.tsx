@@ -11,11 +11,15 @@ interface IUserItemProps {
     user: IUser;
     currentUser: IUser;
     activeChat?: boolean;
+    index?: number;
+    open: boolean;
 }
 const UserItem: React.FC<IUserItemProps> = ({
     user,
     currentUser,
     activeChat,
+    index,
+    open,
 }: IUserItemProps): JSX.Element => {
     const classes = useStyles();
     const { state, dispatch } = useContext(Store);
@@ -27,15 +31,25 @@ const UserItem: React.FC<IUserItemProps> = ({
             const newMsgs = chatUserMessages.filter((msg) => msg.read === false).length;
             setNewMessages(newMsgs);
         }
-    }, [state.userChats.length, currentUser.uid]);
+    }, [JSON.stringify(state.userChats), currentUser.uid]);
 
     const handleOnSelectUser: EventHandler<React.SyntheticEvent<Event | any>> = (e): void => {
         e.stopPropagation();
+        if (
+            state.usersWithChats.length > 0 &&
+            !state.chatUsers.some((user) => user === state.usersWithChats[0].uid)
+        ) {
+            ChatUserActions.removeFromUsersWithChats(
+                currentUser.uid,
+                state.usersWithChats[0].uid,
+                dispatch,
+            );
+        }
         ChatUserActions.resetChatMessages(dispatch);
+        ChatUserActions.setChatAsRead(currentUser.uid, user.uid);
         const timer = setTimeout(() => {
             ChatUserActions.getCurrentChat(currentUser.uid, user.uid, dispatch);
             ChatUserActions.setChatUser(currentUser, user);
-            ChatUserActions.setChatAsRead(currentUser.uid, user.uid);
             clearTimeout(timer);
         }, 200);
     };
@@ -43,10 +57,16 @@ const UserItem: React.FC<IUserItemProps> = ({
     const handleOnDeleteChat: EventHandler<React.SyntheticEvent<Event | any>> = (e): void => {
         e.stopPropagation();
         ChatUserActions.deleteChat(currentUser, user, dispatch);
+        ChatUserActions.resetChatMessages(dispatch);
     };
 
     return (
-        <ListItem key={user.uid} button onClick={handleOnSelectUser}>
+        <ListItem
+            key={user.uid}
+            button
+            onClick={handleOnSelectUser}
+            className={clsx(index === 0 ? classes.active : '', !open ? classes.closed : '')}
+        >
             <Box mr={2}>
                 {user?.photoURL ? (
                     <IconButton color="inherit">
@@ -68,8 +88,12 @@ const UserItem: React.FC<IUserItemProps> = ({
                     </IconButton>
                 )}
             </Box>
-            <ListItemText primary={user.displayName || user.email} />
-            {activeChat && <DeleteIcon onClick={handleOnDeleteChat} />}
+            {open && (
+                <>
+                    <ListItemText primary={user.displayName || user.email} />
+                    {activeChat && <DeleteIcon onClick={handleOnDeleteChat} />}
+                </>
+            )}
         </ListItem>
     );
 };

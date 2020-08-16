@@ -198,6 +198,15 @@ class FirebaseClass {
                         payload: { ...snapshot.val(), chatId: snapshot.key },
                     });
                 });
+            await this.rtdb
+                .ref(`users-chats/${senderId}/${receiverId}`)
+                .once('value', (snapshot) => {
+                    console.log(snapshot.val());
+                    dispatch({
+                        type: TYPES.GET_CHAT_MESSAGES,
+                        payload: { ...snapshot.val(), chatId: snapshot.key },
+                    });
+                });
         } catch (err) {
             throw err;
         }
@@ -213,17 +222,15 @@ class FirebaseClass {
                     });
                 });
             });
-            this.chatChangedToRead(currentUserId, dispatch);
+            await this.rtdb.ref(`users-chats/${currentUserId}`).on('child_changed', (snapshot) => {
+                snapshot.forEach((msg) => {
+                    dispatch({
+                        type: TYPES.GET_USER_CHATS,
+                        payload: { ...msg.val(), user: snapshot.key },
+                    });
+                });
+            });
         } catch (err) {}
-    };
-
-    private chatChangedToRead = async (
-        currentUserId: string,
-        dispatch: (args: IAction) => IAction,
-    ): Promise<void> => {
-        this.rtdb.ref(`users-chats/${currentUserId}`).on('child_changed', (snapshot) => {
-            console.log(snapshot.val());
-        });
     };
 
     public addNewMessageToChat = (chat: IChat): any => {
@@ -234,12 +241,31 @@ class FirebaseClass {
                 this.rtdb
                     .ref(`users-chats/${chat.senderId}/${chat.receiverId}`)
                     .child(chatKey)
-                    .set({ ...chat, uid: chatKey, read: true });
+                    .set({ ...chat, uid: chatKey, read: true, user: chat.receiverId });
                 this.rtdb
                     .ref(`users-chats/${chat.receiverId}/${chat.senderId}`)
                     .child(chatKey)
-                    .set({ ...chat, uid: chatKey });
+                    .set({ ...chat, uid: chatKey, user: chat.senderId });
             }
+        } catch (err) {
+            throw err;
+        }
+    };
+
+    public removeFromUsersWithChats = async (
+        currentUserId: string,
+        chatUserId: string,
+        dispatch: (args: IAction) => IAction,
+    ): Promise<void> => {
+        try {
+            const userChatRef = await this.rtdb.ref(
+                `current-user-chat/${currentUserId}/${chatUserId}`,
+            );
+            userChatRef.remove();
+            dispatch({
+                type: TYPES.ON_CURRENT_CHAT_USER,
+                payload: chatUserId,
+            });
         } catch (err) {
             throw err;
         }
@@ -274,14 +300,7 @@ class FirebaseClass {
                 type: TYPES.ON_DELETE_CHAT,
                 payload: chatUser.uid,
             });
-            const userChatRef = await this.rtdb.ref(
-                `current-user-chat/${currentUser.uid}/${chatUser.uid}`,
-            );
-            userChatRef.remove();
-            dispatch({
-                type: TYPES.ON_CURRENT_CHAT_USER,
-                payload: chatUser.uid,
-            });
+            this.removeFromUsersWithChats(currentUser.uid, chatUser.uid, dispatch);
         } catch (err) {
             throw err;
         }

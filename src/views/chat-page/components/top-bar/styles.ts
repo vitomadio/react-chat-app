@@ -33,6 +33,7 @@ export default makeStyles((theme) => ({
     iconsWrapper: {
         flex: 1,
         display: 'flex',
+        alignItems: 'center',
         justifyContent: 'flex-end',
     },
 }));

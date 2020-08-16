@@ -1,52 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import clsx from 'clsx';
-import {
-    Drawer,
-    Divider,
-    IconButton,
-    InputBase,
-    List,
-    ListItem,
-    ListItemText,
-    Avatar,
-    Box,
-} from '@material-ui/core';
-import { ChevronLeft as ChevronLeftIcon, Search as SearchIcon } from '@material-ui/icons';
+import { Drawer, Divider, IconButton, InputBase, List } from '@material-ui/core';
+import { Search as SearchIcon } from '@material-ui/icons';
 import UserItem from './components/users-list';
-import firebase from 'firebase-config';
-import IUser from 'interfaces/user-interface';
 import { UsersActions } from 'store/users-state';
 import { Store } from 'store';
 
 import useStyles from './styles';
 
 interface IDrawerProps {
-    handleDrawerClose: () => void;
     open: boolean;
 }
 
-export default function App(props: IDrawerProps) {
+export default function App({ open }: IDrawerProps) {
     const classes = useStyles();
     const { state, dispatch } = React.useContext(Store);
-    const [currentUser, setCurrentUser] = useState<IUser | null>(firebase.getCurrentUser());
+    const [search, setSearch] = useState<string>('');
 
     useEffect(() => {
         UsersActions.getAllUsers(dispatch);
     }, []);
+
+    const handleChangeSearch = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    ): void => {
+        const searchWord = e.target.value.toLowerCase();
+        setSearch(searchWord);
+    };
+
     return (
         <Drawer
             variant="permanent"
             classes={{
-                paper: clsx(classes.drawerPaper, !props.open && classes.drawerPaperClose),
+                paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
             }}
-            open={props.open}
+            open={open}
         >
-            <div className={classes.toolbarIcon}>
-                <IconButton onClick={props.handleDrawerClose}>
-                    <ChevronLeftIcon />
-                </IconButton>
-            </div>
-            <Divider />
             <div className={classes.search}>
                 <div className={classes.searchIcon}>
                     <SearchIcon />
@@ -58,31 +47,55 @@ export default function App(props: IDrawerProps) {
                         input: classes.inputInput,
                     }}
                     inputProps={{ 'aria-label': 'search' }}
+                    onChange={handleChangeSearch}
                 />
             </div>
             <Divider />
-            {state.users && currentUser && state.usersWithChats && (
+            {state.users && state.currentUser && (
                 <>
-                    <List component="nav" aria-label="secondary mailbox folders">
-                        {state.usersWithChats.map((user) => (
-                            <UserItem
-                                key={user.uid}
-                                user={user}
-                                currentUser={currentUser}
-                                activeChat
-                            />
-                        ))}
-                    </List>
-                    <Divider />
-                    <List component="nav" aria-label="secondary mailbox folders">
+                    {state.usersWithChats.length > 0 && (
+                        <>
+                            <List
+                                component="nav"
+                                aria-label="secondary mailbox folders"
+                                className={classes.usersList}
+                            >
+                                {state.usersWithChats
+                                    .filter((user) =>
+                                        user.displayName.toLowerCase().includes(search),
+                                    )
+                                    .map((user, idx) => (
+                                        <UserItem
+                                            key={user.uid}
+                                            user={user}
+                                            currentUser={state.currentUser}
+                                            activeChat
+                                            index={idx}
+                                            open={open}
+                                        />
+                                    ))}
+                            </List>
+                            <Divider />
+                        </>
+                    )}
+                    <List
+                        component="nav"
+                        aria-label="secondary mailbox folders"
+                        className={classes.usersList}
+                    >
                         {state.users
                             .filter(
                                 (user) =>
-                                    user.uid !== currentUser.uid &&
+                                    user.uid !== state.currentUser.uid &&
                                     !state.usersWithChats.some((u) => u.uid === user.uid),
                             )
                             .map((user) => (
-                                <UserItem key={user.uid} user={user} currentUser={currentUser} />
+                                <UserItem
+                                    key={user.uid}
+                                    user={user}
+                                    currentUser={state.currentUser}
+                                    open={open}
+                                />
                             ))}
                     </List>
                 </>

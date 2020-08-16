@@ -40,6 +40,12 @@ const sendMessage = async (chat: IChat): Promise<void> => {
     firebase.addNewMessageToChat(chat);
 };
 
+const removeFromUsersWithChats = async (
+    currentUserId: string,
+    chatUserId: string,
+    dispatch: (args: IAction) => IAction,
+): Promise<void> => firebase.removeFromUsersWithChats(currentUserId, chatUserId, dispatch);
+
 const deleteMessage = async (
     chat: IChat,
     messageWriter: string,
@@ -65,6 +71,7 @@ export default {
     getUsersWithChats,
     sendMessage,
     getInitialChatUser,
+    removeFromUsersWithChats,
     deleteMessage,
     deleteChat,
 };

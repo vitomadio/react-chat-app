@@ -3,13 +3,6 @@ import { makeStyles, fade } from '@material-ui/core';
 const drawerWidth = 300;
 
 export default makeStyles((theme) => ({
-    toolbarIcon: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: '0 8px',
-        ...theme.mixins.toolbar,
-    },
     drawerPaper: {
         position: 'relative',
         whiteSpace: 'nowrap',
@@ -20,6 +13,7 @@ export default makeStyles((theme) => ({
         }),
     },
     drawerPaperClose: {
+        position: 'relative',
         overflowX: 'hidden',
         transition: theme.transitions.create('width', {
             easing: theme.transitions.easing.sharp,
@@ -67,5 +61,8 @@ export default makeStyles((theme) => ({
         [theme.breakpoints.up('md')]: {
             width: '20ch',
         },
+    },
+    usersList: {
+        padding: 0,
     },
 }));
