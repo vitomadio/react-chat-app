@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Formik, FormikHelpers, Field } from 'formik';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
@@ -34,7 +34,7 @@ const LoginPage: React.FC<ILoginProps> = (props: ILoginProps) => {
     const [signIn, setSignIn] = useState(true);
     const classes = useStyles();
 
-    const handleSubmit = useCallback(async (values: IValues, signIn: boolean) => {
+    const handleSubmit = async (values: IValues, signIn: boolean) => {
         try {
             if (signIn) {
                 await firebase.login(values.email, values.password);
@@ -42,15 +42,11 @@ const LoginPage: React.FC<ILoginProps> = (props: ILoginProps) => {
             } else {
                 await firebase.register(values.name, values.email, values.password);
                 props.history.push('/chat');
-                // setMessage({
-                //     status: 'success',
-                //     text: 'Please check your email to avtivate your account.',
-                // });
             }
         } catch (error) {
             setMessage({ status: 'error', text: error.message });
         }
-    }, []);
+    };
 
     return (
         <Container component="main" maxWidth="xs">
