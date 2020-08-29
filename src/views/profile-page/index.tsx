@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import clsx from 'clsx';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import IUser from 'interfaces/user-interface';

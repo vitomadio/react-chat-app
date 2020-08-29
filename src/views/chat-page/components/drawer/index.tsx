@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { Drawer, Divider, IconButton, InputBase, List } from '@material-ui/core';
+import { Drawer, Divider, InputBase, List } from '@material-ui/core';
 import { Search as SearchIcon } from '@material-ui/icons';
 import UserItem from './components/users-list';
 import { UsersActions } from 'store/users-state';
@@ -19,7 +19,7 @@ export default function App({ open }: IDrawerProps) {
 
     useEffect(() => {
         UsersActions.getAllUsers(dispatch);
-    }, []);
+    }, [dispatch]);
 
     const handleChangeSearch = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,

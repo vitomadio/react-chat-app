@@ -31,7 +31,7 @@ const UserItem: React.FC<IUserItemProps> = ({
             const newMsgs = chatUserMessages.filter((msg) => msg.read === false).length;
             setNewMessages(newMsgs);
         }
-    }, [JSON.stringify(state.userChats), currentUser.uid]);
+    }, [state.userChats, currentUser.uid, user]);
 
     const handleOnSelectUser: EventHandler<React.SyntheticEvent<Event | any>> = (e): void => {
         e.stopPropagation();

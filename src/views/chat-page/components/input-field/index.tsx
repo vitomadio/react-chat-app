@@ -12,7 +12,7 @@ interface IValues {
 }
 
 const InputField: React.FC = (): React.ReactElement => {
-    const { state, dispatch } = useContext(Store);
+    const { state } = useContext(Store);
     const classes = useStyles();
 
     const handleSendMessage = (values) => {

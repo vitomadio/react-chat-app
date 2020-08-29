@@ -18,7 +18,7 @@ const ChatPage: React.FC = () => {
     const [open, setOpen] = useState<boolean>(true);
     const [messageWriter, setMessageWriter] = useState<string | undefined>();
     const [messageSelected, setMessageSelected] = useState<IChat | undefined>();
-
+    const currentUser = state.currentUser || null;
     const handleDrawer = () => {
         setOpen(!open);
     };
@@ -39,10 +39,10 @@ const ChatPage: React.FC = () => {
     };
 
     useEffect(() => {
-        if (!state.currentUser) {
+        if (currentUser == null) {
             UsersActions.getCurrentUser(dispatch);
         }
-    }, []);
+    }, [dispatch, currentUser]);
 
     useEffect(() => {
         if (state.currentUser?.uid) {
@@ -50,7 +50,8 @@ const ChatPage: React.FC = () => {
             UsersActions.getChatUsers(state.currentUser?.uid, dispatch);
             ChatUserActions.getUsersWithChats(state.currentUser.uid, dispatch);
         }
-    }, [state.currentUser?.uid]);
+        // eslint-disable-next-line
+    }, [currentUser?.uid, state.currentUser]);
 
     useEffect(() => {
         if (state.usersWithChats.length > 0 && state.messages.length === 0) {
@@ -61,6 +62,7 @@ const ChatPage: React.FC = () => {
             );
             ChatUserActions.setChatAsRead(state.currentUser.uid, state.usersWithChats[0].uid);
         }
+        // eslint-disable-next-line
     }, [state.usersWithChats[0]?.uid]);
 
     console.log(state);

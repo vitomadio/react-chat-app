@@ -25,13 +25,13 @@ const TopBar: React.FC<ITopBarProps> = (props: ITopBarProps) => {
     const classes = useStyles();
     const { state, dispatch } = React.useContext(Store);
     const [newMessages, setNewMessages] = useState<number>(0);
-
+    const currentUserId = state.currentUser?.uid;
     useEffect(() => {
         if (state.userChats.length > 0) {
             const newMsgs = state.userChats.filter((chat) => !chat.read).length;
             setNewMessages(newMsgs);
         }
-    }, [JSON.stringify(state.userChats), state.currentUser?.uid]);
+    }, [state.userChats, currentUserId]);
 
     const handleLogOut = async () => {
         await firebase.logout();

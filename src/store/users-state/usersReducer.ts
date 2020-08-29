@@ -1,4 +1,3 @@
-import * as React from 'react';
 import TYPES from '../action-types';
 import IAction from 'interfaces/action-interface';
 
