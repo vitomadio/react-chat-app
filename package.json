@@ -2,7 +2,7 @@
     "name": "react-chat-app",
     "version": "0.1.0",
     "private": true,
-    "homepage": "http://vitomadio.gitlab.io/react-chat-app",
+    "homepage": "http://vitomadio.github.io/react-chat-app",
     "dependencies": {
         "@material-ui/core": "4.11.0",
         "@material-ui/icons": "4.9.1",
@@ -20,6 +20,7 @@
         "eslint-plugin-react": "7.20.3",
         "firebase": "7.16.0",
         "formik": "2.1.5",
+        "gh-pages": "^3.1.0",
         "react": "16.13.1",
         "react-dom": "16.13.1",
         "react-router-dom": "5.2.0",
@@ -30,7 +31,8 @@
         "start": "REACT_APP_STAGE=dev react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
-        "deploy:": "REACT_APP_STAGE=prod react-scripts build",
+        "predeploy": "npm run build",
+        "deploy": "gh-pages -d build",
         "eject": "react-scripts eject",
         "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix"
     },
