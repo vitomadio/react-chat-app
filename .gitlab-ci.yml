@@ -1,5 +1,9 @@
 image: node:12.18.3
 
+cache:
+    paths:
+        - node_modules/
+
 pages:
     script:
         - npm install
