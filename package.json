@@ -2,7 +2,7 @@
     "name": "react-chat-app",
     "version": "0.1.0",
     "private": true,
-    "homepage": "http://vitomadio.github.io/react-chat-app",
+    "homepage": "https://vitomadio.github.io/react-chat-app/",
     "dependencies": {
         "@material-ui/core": "4.11.0",
         "@material-ui/icons": "4.9.1",

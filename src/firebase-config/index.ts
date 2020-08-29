@@ -201,7 +201,6 @@ class FirebaseClass {
             await this.rtdb
                 .ref(`users-chats/${senderId}/${receiverId}`)
                 .once('value', (snapshot) => {
-                    console.log(snapshot.val());
                     dispatch({
                         type: TYPES.GET_CHAT_MESSAGES,
                         payload: { ...snapshot.val(), chatId: snapshot.key },

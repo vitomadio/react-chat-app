@@ -65,8 +65,6 @@ const ChatPage: React.FC = () => {
         // eslint-disable-next-line
     }, [state.usersWithChats[0]?.uid]);
 
-    console.log(state);
-
     return (
         <>
             <div className={classes.root}>

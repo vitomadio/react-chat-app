@@ -23,8 +23,6 @@ const theme = createMuiTheme({
     },
 });
 
-console.log(theme);
-
 const App: React.FunctionComponent = (): JSX.Element => {
     const [firebaseInitialized, setFirebaseInitialized] = useState(false);
 
